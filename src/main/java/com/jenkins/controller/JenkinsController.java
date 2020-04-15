@@ -32,6 +32,22 @@ public class JenkinsController {
 	String value= jenkinsService.jenkinsGetAPI();
 		
 		return value;
+
+/*http://localhost:8080/api/json?tree=jobs[name,url,builds[number,result,duration,url]] 
+
+http://localhost:8080/job/build%20project/31/api/json
+
+http://localhost:8080/api/json?tree=jobs[name,url,builds[number,result,duration,url,actions[buildsByBranchName]]]
+
+http://localhost:8080/api/json?tree=jobs[name,url,builds[number,result,duration,url,actions[buildsByBranchName.refs/remotes/origin/master]]]
+
+
+http://localhost:8080/api/json?tree=jobs[name,url,builds[number,result,duration,url,actions[buildsByBranchName[*[*[*]]]]]]
+
+
+
+
+*/
     }
 	
 	
