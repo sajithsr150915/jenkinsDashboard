@@ -1,7 +1,9 @@
 package com.jenkins.model;
 
+import java.util.ArrayList;
+import java.util.List;
 
-	public class Build {
+public class Build {
 		
 		
 	 private String id;
@@ -9,6 +11,7 @@ package com.jenkins.model;
 	 private String result;
 	 private long timestamp;
 	 private long duration;
+	 private List<Action> actions=new ArrayList<>(); 
 	 
 	public String getId() {
 		return id;
@@ -40,6 +43,13 @@ package com.jenkins.model;
 	public void setDuration(long duration) {
 		this.duration = duration;
 	}
+	public List<Action> getActions() {
+		return actions;
+	}
+	public void setActions(List<Action> actions) {
+		this.actions = actions;
+	}
+	
 
 	 
 	

@@ -42,6 +42,21 @@ http://localhost:8080/api/json?tree=jobs[name,url,builds[number,result,duration,
 */
     }
 	
+	@GetMapping("/jenkinswithTestReport")
+    public String  jenkinswithTestReport() 
+    {
+		
+		
+	return jenkinsService.getJenkinsDetails();  
+		
+    }
 	
-	
+	/**sample selenuim projects
+	 * https://github.com/reportportal/example-cucumber-junit-selenium-logback-maven.git
+	 * https://github.com/kolorobot/spring-boot-thymeleaf.git
+	 * https://github.com/paulvi/selenium-for-spring-boot
+	 * 
+	 * In post build action give test report Xmls- target/surefire-reports/*.xml
+	 * 
+	 */
 }

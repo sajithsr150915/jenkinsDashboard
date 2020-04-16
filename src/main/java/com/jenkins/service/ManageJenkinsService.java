@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import com.jenkins.constants.Constants;
+import com.jenkins.model.Action;
 import com.jenkins.model.Build;
 import com.jenkins.model.Deployment;
 import com.jenkins.model.JenkinsDetails;
@@ -194,6 +195,136 @@ public class ManageJenkinsService {
 			   
 		  }
 	}	
+	
+	
+	public JenkinsDetails jenkinswithTestReport() {
+
+		String jenkinsUrl = this.url + Constants.JENKINS_TESTDETAILS_API_URL;
+		return this.restTemplate.getForObject(jenkinsUrl, JenkinsDetails.class);
+	}
+	
+	public TestJobCountDetail acceptanceTest() {
+		return getTestCaseCount(Constants.ACCEPTANCE);
+	}
+	
+	
+	public TestJobCountDetail getTestCaseCount(String jobName) {
+
+		JenkinsDetails jenkinsDetails = jenkinswithTestReport();
+		TestJobCountDetail testJobCountDetail = new TestJobCountDetail();
+		if (null != jenkinsDetails) {
+			List<Job> jobList = jenkinsDetails.getJobs();
+
+			if (!jobList.isEmpty()) {
+
+				for (Job job : jobList) {
+						if (!(jobName == null || job.getName().contains(jobName))) {
+						continue;
+						}
+					
+					List<Build> buildList = job.getBuilds();
+					if (!buildList.isEmpty()) {
+						findTestCaseCount(buildList,  testJobCountDetail);
+					}
+				}
+			}
+
+			
+
+		}
+		return testJobCountDetail;
+
+	}
+	
+	private TestJobCountDetail findTestCaseCount(List<Build> buildList,  TestJobCountDetail testJobCountDetail) {
+		for(Build build:buildList) {
+		List<Action> actionList=build.getActions();
+		if(!actionList.isEmpty()) {
+			for(Action action:actionList) {
+				if(Constants.TEST_REPORT_URL.equalsIgnoreCase(action.getUrlName())) {
+					int failureCount=action.getFailCount();
+					int skippedCount=action.getSkipCount();
+					int totalCount=action.getTotalCount();
+					int successCount=totalCount-(failureCount+skippedCount);
+					
+					testJobCountDetail.setFailureCount(testJobCountDetail.getFailureCount()+failureCount);
+					testJobCountDetail.setSkippedCount(testJobCountDetail.getSkippedCount()+skippedCount);
+					testJobCountDetail.setSuccessCount(testJobCountDetail.getSuccessCount()+successCount);
+					testJobCountDetail.setTotalCount(testJobCountDetail.getTotalCount()+totalCount);
+					break;	
+				}
+			}
+		}
 		
+			  
+	}
+	return testJobCountDetail;
+
+	}
+	
+	private TestJobDetail findTestCaseCount(List<Build> buildList,  TestJobDetail testJobCountDetail) {
+		for(Build build:buildList) {
+		List<Action> actionList=build.getActions();
+		if(!actionList.isEmpty()) {
+			for(Action action:actionList) {
+				if(Constants.TEST_REPORT_URL.equalsIgnoreCase(action.getUrlName())) {
+					int failureCount=action.getFailCount();
+					int skippedCount=action.getSkipCount();
+					int totalCount=action.getTotalCount();
+					int successCount=totalCount-(failureCount+skippedCount);
+					
+					testJobCountDetail.setFailureCount(testJobCountDetail.getFailureCount()+failureCount);
+					testJobCountDetail.setSkippedCount(testJobCountDetail.getSkippedCount()+skippedCount);
+					testJobCountDetail.setSuccessCount(testJobCountDetail.getSuccessCount()+successCount);
+					testJobCountDetail.setTotalCount(testJobCountDetail.getTotalCount()+totalCount);
+					break;	
+				}
+			}
+		}
+		
+			  
+	}
+	return testJobCountDetail;
+
+	}
+	
+	
+	public List<TestJobDetail> acceptanceTestGroup() {
+		return getTestCaseCountGroupByJob(Constants.ACCEPTANCE);
+	}
+	
+	
+	public List<TestJobDetail> getTestCaseCountGroupByJob(String jobName) {
+
+		JenkinsDetails jenkinsDetails = jenkinswithTestReport();
+		List<TestJobDetail> testJobList=new ArrayList<>(); 
+		
+		if (null != jenkinsDetails) {
+			List<Job> jobList = jenkinsDetails.getJobs();
+
+			if (!jobList.isEmpty()) {
+
+				for (Job job : jobList) {
+						if (!(jobName == null || job.getName().contains(jobName))) {
+						continue;
+						}
+						TestJobDetail testJobCountDetail = new TestJobDetail();					
+					List<Build> buildList = job.getBuilds();
+					if (!buildList.isEmpty()) {
+						findTestCaseCount(buildList,  testJobCountDetail);
+					}
+					testJobCountDetail.setName(job.getName());
+					testJobList.add(testJobCountDetail);
+
+					 
+				}
+			}
+
+			
+
+		}
+		return testJobList;
+
+	}
 	
 }

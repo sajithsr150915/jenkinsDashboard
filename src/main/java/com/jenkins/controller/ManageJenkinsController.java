@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.jenkins.model.*;
 import com.jenkins.service.JenkinsCountDetail;
 import com.jenkins.service.ManageJenkinsService;
+import com.jenkins.service.TestJobCountDetail;
+import com.jenkins.service.TestJobDetail;
 
 
 @RestController
@@ -68,6 +70,20 @@ public class ManageJenkinsController {
 	public  List<Deployment> lastSuccesfulPROD() {
   
 		return manageJenkinsService.lastSuccesfulPROD(); 
+
+	}
+	
+	@GetMapping("/acceptanceTest")
+	public  TestJobCountDetail acceptanceTest() {
+  
+		return manageJenkinsService.acceptanceTest(); 
+
+	}
+	
+	@GetMapping("/acceptanceTestGroup")
+	public  List<TestJobDetail> acceptanceTestGroup() {
+  
+		return manageJenkinsService.acceptanceTestGroup(); 
 
 	}
 	

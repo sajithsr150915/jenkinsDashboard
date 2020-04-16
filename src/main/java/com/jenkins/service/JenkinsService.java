@@ -33,7 +33,11 @@ public class JenkinsService {
 		return this.restTemplate.getForObject(jenkinsUrl, String.class); 
 	}
 	
-	
+	public String jenkinswithTestReport() {
+		
+		String jenkinsUrl = this.url + Constants.JENKINS_TESTDETAILS_API_URL;
+		return this.restTemplate.getForObject(jenkinsUrl, String.class); 
+	}
 			
 		
 	
