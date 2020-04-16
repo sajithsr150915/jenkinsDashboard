@@ -57,6 +57,7 @@ http://localhost:8080/api/json?tree=jobs[name,url,builds[number,result,duration,
 	 * https://github.com/paulvi/selenium-for-spring-boot
 	 * 
 	 * In post build action give test report Xmls- target/surefire-reports/*.xml
+	 * use Test Result Analyzer plugin
 	 * 
 	 */
 }
