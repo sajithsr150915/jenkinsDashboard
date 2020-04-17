@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -84,6 +85,48 @@ public class ManageJenkinsController {
 	public  List<TestJobDetail> acceptanceTestGroup() {
   
 		return manageJenkinsService.acceptanceTestGroup(); 
+
+	}
+	
+	/**
+	 * Method for getting the total number of Builds, total Successful Builds and
+	 * total Failed Builds within limit of month count
+	 * 
+	 * @param limitMonthCount
+	 * @return JenkinsCountDetail
+	 */
+	@GetMapping("/jenkinsBuildCount/{limitMonthCount}")
+	public JenkinsCountDetail getAllBuildsCount(@PathVariable("limitMonthCount") int limitMonthCount) {
+
+		return manageJenkinsService.getAllBuildsCountbyDate(limitMonthCount);
+
+	}
+	
+	/**
+	 * Method for getting the total number of UAT Builds, total Successful UAT Builds and
+	 * total Failed UAT Builds within limit of month count
+	 * 
+	 * @param limitMonthCount
+	 * @return JenkinsCountDetail
+	 */
+	@GetMapping("/citBuildCount/{limitMonthCount}")
+	public JenkinsCountDetail getCITBuildsCount(@PathVariable("limitMonthCount") int limitMonthCount) {
+
+		return manageJenkinsService.getCITBuildsCountbyDate(limitMonthCount);
+
+	}
+	
+	/**
+	 * Method for getting the total number of PROD Builds, total Successful PROD Builds and
+	 * total Failed PROD Builds within limit of month count
+	 * 
+	 * @param limitMonthCount
+	 * @return JenkinsCountDetail
+	 */
+	@GetMapping("/prodBuildCount/{limitMonthCount}")
+	public JenkinsCountDetail getPRODBuildsCount(@PathVariable("limitMonthCount") int limitMonthCount) {
+
+		return manageJenkinsService.getPRODBuildsCountbyDate(limitMonthCount);
 
 	}
 	

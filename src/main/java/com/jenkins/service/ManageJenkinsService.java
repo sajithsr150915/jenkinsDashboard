@@ -1,9 +1,16 @@
 package com.jenkins.service;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -88,7 +95,10 @@ public class ManageJenkinsService {
 	}
 	
 	public List<Deployment> lastSuccesfulUAT() {
-		return lastSuccesfulRun(Constants.UAT_DEPLOYMENT,Constants.SUCESS);
+		
+		// previously used lastSuccesfulRun method
+		
+		return lastSuccesfulRelease(Constants.UAT_DEPLOYMENT);
 		
 	}
 	
@@ -327,4 +337,75 @@ public class ManageJenkinsService {
 
 	}
 	
+	
+	public JenkinsCountDetail getAllBuildsCountbyDate(int limitMonthCount) {
+
+		return getBuildsCountByDate(limitMonthCount, Constants.TYPE_ALL);
+	}
+	
+	public JenkinsCountDetail getCITBuildsCountbyDate(int limitMonthCount) {
+
+		return getBuildsCountByDate(limitMonthCount, Constants.UAT_DEPLOYMENT);
+	}
+	
+	public JenkinsCountDetail getPRODBuildsCountbyDate(int limitMonthCount) {
+
+		return getBuildsCountByDate(limitMonthCount, Constants.PROD_DEPLOYMENT);
+	}
+	
+	private JenkinsCountDetail getBuildsCountByDate(int limitMonthCount, String jobType) {
+
+		JenkinsDetails jenkinsDetails = getJenkinsDetails();
+		Predicate<Build> timePredicate = build -> build.getTimestamp() >= calculateDateLimit(limitMonthCount);
+		Predicate<Job> namePredicate = job -> jobType.equals(Constants.TYPE_ALL) ? Boolean.TRUE
+				: job.getName().contains(jobType);
+
+		long totalCount = 0;
+		long successCount = 0;
+		long failureCount = 0;
+
+		Supplier<Stream<Build>> buildStream = () -> jenkinsDetails.getJobs().stream().filter(namePredicate)
+				.flatMap(job -> job.getBuilds().stream()).filter(timePredicate);
+
+		totalCount = buildStream.get().count();
+		successCount = buildStream.get().filter(build -> Constants.SUCESS.equalsIgnoreCase(build.getResult())).count();
+		failureCount = buildStream.get().filter(build -> Constants.FAILURE.equalsIgnoreCase(build.getResult())).count();
+
+		JenkinsCountDetail jenkinsCountDetail = new JenkinsCountDetail();
+
+		setCountOfBuilds(jenkinsCountDetail, Math.toIntExact(totalCount), Math.toIntExact(successCount),
+				Math.toIntExact(failureCount));
+
+		return jenkinsCountDetail;
+	}
+	
+	private long calculateDateLimit(int limitMonthCount) {
+		
+		// LocalDate todaysDate = LocalDate.now(); Ideally this should be the code. Date
+		// hard coded for testing purposes.
+		LocalDate todaysDate = LocalDate.parse("2020-05-10");
+		LocalDate limitDate = todaysDate.minusMonths(limitMonthCount);
+		return limitDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+	}
+	
+	private List<Deployment> lastSuccesfulRelease(String jobName) {
+
+		JenkinsDetails jenkinsDetails = getSuccessfulBuildsDetails();
+		Predicate<Job> namePredicate = job -> job.getName().contains(jobName);
+
+		return jenkinsDetails
+				.getJobs().stream().filter(
+						namePredicate)
+				.map(job -> new Deployment(job.getName(), job.getLastSuccessfulBuild().getTimestamp(),
+						Instant.ofEpochMilli(job.getLastSuccessfulBuild().getTimestamp()).atZone(ZoneId.systemDefault())
+								.toLocalDate()))
+				.collect(Collectors.toList());
+	}
+	
+	private JenkinsDetails getSuccessfulBuildsDetails() {
+		
+		String jenkinsUrl = this.url + Constants.SUCCESSFUL_BUILDS_API_URL; 
+		return this.restTemplate.getForObject(jenkinsUrl, JenkinsDetails.class);
+		
+	}
 }
