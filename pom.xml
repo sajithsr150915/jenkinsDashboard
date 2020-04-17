@@ -11,7 +11,7 @@
 	<groupId>com.jenkins</groupId>
 	<artifactId>jenkinsDashboard</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>jenkinsService</name>
+	<name>jenkinsDashboard</name>
 	<description>jenkinsDashboard</description>
 	<packaging>jar</packaging>
 	<properties>
@@ -69,6 +69,29 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 		
+		
+		<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-api</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter-engine</artifactId>
+    <scope>test</scope>
+</dependency>
+<dependency>
+    <groupId>org.junit.platform</groupId>
+    <artifactId>junit-platform-launcher</artifactId>
+    <scope>test</scope>
+</dependency>
+ 
+<!-- Mockito extention -->
+<dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-junit-jupiter</artifactId>
+    <scope>test</scope>
+</dependency>
 	</dependencies>
 
 
