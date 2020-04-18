@@ -2,26 +2,26 @@ package com.jenkins.service;
 
 public class JenkinsCountDetail {
 	
-	private Integer totalCount;
-	private Integer successCount;
-	private Integer failureCount;
+	private int totalCount;
+	private int successCount;
+	private int failureCount;
 	
-	public Integer getTotalCount() {
+	public int getTotalCount() {
 		return totalCount;
 	}
-	public void setTotalCount(Integer totalCount) {
+	public void setTotalCount(int totalCount) {
 		this.totalCount = totalCount;
 	}
-	public Integer getSuccessCount() {
+	public int getSuccessCount() {
 		return successCount;
 	}
-	public void setSuccessCount(Integer successCount) {
+	public void setSuccessCount(int successCount) {
 		this.successCount = successCount;
 	}
-	public Integer getFailureCount() {
+	public int getFailureCount() {
 		return failureCount;
 	}
-	public void setFailureCount(Integer failureCount) {
+	public void setFailureCount(int failureCount) {
 		this.failureCount = failureCount;
 	}
 	
