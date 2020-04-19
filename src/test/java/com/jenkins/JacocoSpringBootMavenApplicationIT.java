@@ -20,7 +20,7 @@ import com.jenkins.service.ManageJenkinsService;
 import com.jenkins.service.TestJobCountDetail;
 import com.jenkins.service.TestJobDetail; 
 
-class TestJenkinService {
+class JacocoSpringBootMavenApplicationIT {
 
 	//@Mock
 	public RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder();
