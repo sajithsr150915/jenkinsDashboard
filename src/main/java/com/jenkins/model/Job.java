@@ -7,7 +7,7 @@ public class Job {
 
 	private String name;
 	private String url;
-	List<Build> builds = new ArrayList<>();
+	List<Build> allBuilds = new ArrayList<>();
 	private Build lastSuccessfulBuild;
 
 	public String getName() {
@@ -26,12 +26,14 @@ public class Job {
 		this.url = url;
 	}
 
-	public List<Build> getBuilds() {
-		return builds;
+
+
+	public List<Build> getAllBuilds() {
+		return allBuilds;
 	}
 
-	public void setBuilds(List<Build> builds) {
-		this.builds = builds;
+	public void setAllBuilds(List<Build> allBuilds) {
+		this.allBuilds = allBuilds;
 	}
 
 	public Build getLastSuccessfulBuild() {

@@ -3,25 +3,38 @@ package com.jenkins;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.mockito.InjectMocks;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import com.jenkins.controller.ManageJenkinsController;
+import com.jenkins.model.Deployment;
+import com.jenkins.service.JenkinsCountDetail;
 import com.jenkins.service.ManageJenkinsService;
+import com.jenkins.service.TestJobCountDetail;
+import com.jenkins.service.TestJobDetail; 
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+class TestJenkinService {
 
-
-class JacocoSpringBootMavenApplicationIT {
-
+	//@Mock
+	public RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder();
 	
+	@InjectMocks
+	ManageJenkinsService manageJenkinsService=new ManageJenkinsService(restTemplateBuilder); 
 	
-	@Mock
-	ManageJenkinsService manageJenkinsService;
+    public static final int COUNT_ZER0=0;
+    
+    
+    @InjectMocks
+    ManageJenkinsController manageJenkinsController=new ManageJenkinsController();
+	
+
 	
 	@Test
 	public void jenkinsBuildDetails() throws URISyntaxException {
@@ -162,15 +175,107 @@ class JacocoSpringBootMavenApplicationIT {
 
 	/*@Test
 	public void testgetCountDetailsofJenkins() throws URISyntaxException {
-		
-
-		when(manageJenkinsService.getJenkinsDetails()).thenReturn(null);
-		Assertions.assertEquals(manageJenkinsService.getCountDetailsofJenkins(null).getTotalCount(), 0);
+		JenkinsDetails jenkinsDetails=new JenkinsDetails();
+		manageJenkinsService=Mockito.mock(ManageJenkinsService.class);
+		Mockito.doReturn(jenkinsDetails).when(manageJenkinsService).getJenkinsDetails();
+		Assertions.assertEquals(manageJenkinsController.getCountDetailsofJenkins().getTotalCount(), COUNT_ZER0);
 		
 		
 	}*/
+
+  
+     
+	@Test
+	public void testgetCountDetailsofJenkins() throws URISyntaxException {
+		
+
+		JenkinsCountDetail jenkinsCountDetail =manageJenkinsService.getCountDetailsofJenkins(null);
+		Assertions.assertEquals(COUNT_ZER0,jenkinsCountDetail.getTotalCount());
+	
+	}
+	
+	@Test
+	public void testgetCountDetailsofJobs() throws URISyntaxException {
+		
+
+		Map<String,JenkinsCountDetail> map =manageJenkinsService.getCountDetailsofJobs();
+		Assertions.assertEquals(COUNT_ZER0,map.size());
+	
+	}
+	
+	@Test
+	public void testuatDeployments() throws URISyntaxException {
+		
+
+		JenkinsCountDetail countDetail =manageJenkinsService.uatDeployments();
+		Assertions.assertEquals( COUNT_ZER0,countDetail.getTotalCount());
+	
+	}
 	
 	
+	@Test
+	public void testprodDeployments() throws URISyntaxException {
+		
+
+		JenkinsCountDetail countDetail =manageJenkinsService.prodDeployments();
+		Assertions.assertEquals(COUNT_ZER0,countDetail.getTotalCount());
+	
+	}
+	
+/*	@Test
+	public void testlastSuccesfulUAT() throws URISyntaxException {
+		
+
+		List<Deployment> list =manageJenkinsService.lastSuccesfulUAT();
+		Assertions.assertEquals(list.size(), COUNT_ZER0);
+	
+	}*/
+	
+	
+	
+	@Test
+	public void testlastSuccesfulPROD() throws URISyntaxException {
+		
+
+		List<Deployment> list =manageJenkinsService.lastSuccesfulPROD();
+		Assertions.assertEquals(COUNT_ZER0,list.size());
+	
+	}
+	
+	
+	@Test
+	public void testacceptanceTest() throws URISyntaxException {
+		
+
+		TestJobCountDetail countDetail =manageJenkinsService.acceptanceTest();
+		Assertions.assertEquals(COUNT_ZER0,countDetail.getTotalCount());
+	
+	}
+	
+	
+	@Test
+	public void testacceptanceTestGroup() throws URISyntaxException {
+		
+
+		List<TestJobDetail>list =manageJenkinsService.acceptanceTestGroup();
+		Assertions.assertEquals(COUNT_ZER0,list.size());
+	
+	}
+	
+	
+	
+	@Test
+	public void testgetAllBuildsCountbyDate() throws URISyntaxException {
+		
+
+		JenkinsCountDetail countDetail =manageJenkinsService.getAllBuildsCountbyDate(1);
+		Assertions.assertEquals(COUNT_ZER0,countDetail.getTotalCount()); 
+	
+	}
+	
+	
+	
+
 	
 	
 

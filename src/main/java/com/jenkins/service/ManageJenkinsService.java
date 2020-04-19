@@ -44,11 +44,18 @@ public class ManageJenkinsService {
 				.basicAuthentication(usrname, pswd)
 				.build();
 	}
+	
+	
 		
 	public JenkinsDetails getJenkinsDetails() {
-		
+		try {
 		String jenkinsUrl = this.url + Constants.JENKINS_DETAILS_API_URL; 
 		return this.restTemplate.getForObject(jenkinsUrl, JenkinsDetails.class);
+		}catch(Exception e) {
+			return null;
+			
+			
+		}
 		
 	}
 	
@@ -78,7 +85,7 @@ public class ManageJenkinsService {
 						continue;
 						}
 					
-					List<Build> buildList = job.getBuilds();
+					List<Build> buildList = job.getAllBuilds();
 					if (!buildList.isEmpty()) {
 						successCount=findBuildCount(buildList,  successCount);
 						totalCount=totalCount+buildList.size();
@@ -123,7 +130,7 @@ public class ManageJenkinsService {
 							continue;
 						}
 					Deployment deployment=new Deployment();
-					List<Build> buildList = job.getBuilds();
+					List<Build> buildList = job.getAllBuilds();
 					if (!buildList.isEmpty()) {
 						findSuccesfulBuild(buildList, deployment, job,status);
 						deploymentList.add(deployment); 
@@ -159,7 +166,7 @@ public class ManageJenkinsService {
 					Integer successCount = 0;
 					JenkinsCountDetail jenkinsCountDetail = new JenkinsCountDetail();
 
-					List<Build> buildList = job.getBuilds();
+					List<Build> buildList = job.getAllBuilds();
 					if (!buildList.isEmpty()) {
 						successCount=  findBuildCount(buildList, successCount);
 						totalCount=totalCount+buildList.size();
@@ -208,9 +215,12 @@ public class ManageJenkinsService {
 	
 	
 	public JenkinsDetails jenkinswithTestReport() {
-
+       try {
 		String jenkinsUrl = this.url + Constants.JENKINS_TESTDETAILS_API_URL;
 		return this.restTemplate.getForObject(jenkinsUrl, JenkinsDetails.class);
+       }catch(Exception e) {
+    	   return null;
+       }
 	}
 	
 	public TestJobCountDetail acceptanceTest() {
@@ -232,7 +242,7 @@ public class ManageJenkinsService {
 						continue;
 						}
 					
-					List<Build> buildList = job.getBuilds();
+					List<Build> buildList = job.getAllBuilds();
 					if (!buildList.isEmpty()) {
 						findTestCaseCount(buildList,  testJobCountDetail);
 					}
@@ -319,7 +329,7 @@ public class ManageJenkinsService {
 						continue;
 						}
 						TestJobDetail testJobCountDetail = new TestJobDetail();					
-					List<Build> buildList = job.getBuilds();
+					List<Build> buildList = job.getAllBuilds();
 					if (!buildList.isEmpty()) {
 						findTestCaseCount(buildList,  testJobCountDetail);
 					}
@@ -356,6 +366,9 @@ public class ManageJenkinsService {
 	private JenkinsCountDetail getBuildsCountByDate(int limitMonthCount, String jobType) {
 
 		JenkinsDetails jenkinsDetails = getJenkinsDetails();
+		JenkinsCountDetail jenkinsCountDetail = new JenkinsCountDetail();
+
+		if(null!=jenkinsDetails) {
 		Predicate<Build> timePredicate = build -> build.getTimestamp() >= calculateDateLimit(limitMonthCount);
 		Predicate<Job> namePredicate = job -> jobType.equals(Constants.TYPE_ALL) ? Boolean.TRUE
 				: job.getName().contains(jobType);
@@ -365,17 +378,17 @@ public class ManageJenkinsService {
 		long failureCount = 0;
 
 		Supplier<Stream<Build>> buildStream = () -> jenkinsDetails.getJobs().stream().filter(namePredicate)
-				.flatMap(job -> job.getBuilds().stream()).filter(timePredicate);
+				.flatMap(job -> job.getAllBuilds().stream()).filter(timePredicate);
 
 		totalCount = buildStream.get().count();
 		successCount = buildStream.get().filter(build -> Constants.SUCESS.equalsIgnoreCase(build.getResult())).count();
 		failureCount = buildStream.get().filter(build -> Constants.FAILURE.equalsIgnoreCase(build.getResult())).count();
 
-		JenkinsCountDetail jenkinsCountDetail = new JenkinsCountDetail();
+
 
 		setCountOfBuilds(jenkinsCountDetail, Math.toIntExact(totalCount), Math.toIntExact(successCount),
 				Math.toIntExact(failureCount));
-
+		}
 		return jenkinsCountDetail;
 	}
 	
@@ -408,4 +421,6 @@ public class ManageJenkinsService {
 		return this.restTemplate.getForObject(jenkinsUrl, JenkinsDetails.class);
 		
 	}
+	
+
 }

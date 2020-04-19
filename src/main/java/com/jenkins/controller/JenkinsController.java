@@ -21,7 +21,7 @@ public class JenkinsController {
     {
 		
 		
-	return jenkinsService.getJenkinsDetails();  
+	return jenkinsService.jenkinswithTestReport();  
 		
 		
 
