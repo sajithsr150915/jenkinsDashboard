@@ -25,7 +25,7 @@ public class JenkinsJobController {
 	
 	@GetMapping(value= {"/totalBuildCountJenkins"})
 	public JenkinsCountDetail getTotalBuildCountJenkins() {
-
+ 
 		return manageJenkinsService.getTotalBuildCountJenkins(null); 
 
 	}
@@ -33,7 +33,7 @@ public class JenkinsJobController {
 	@GetMapping(value= {"/totalBuildCountUAT"})
 	public JenkinsCountDetail getTotalBuildCountUAT() {
 
-		return manageJenkinsService.getTotalBuildCountUAT(null); 
+		return manageJenkinsService.getTotalBuildCountUAT(null);  
 
 	}
 	

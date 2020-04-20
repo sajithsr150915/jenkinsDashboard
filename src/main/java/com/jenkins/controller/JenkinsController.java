@@ -21,7 +21,7 @@ public class JenkinsController {
     {
 		
 		
-	return jenkinsService.jenkinswithTestReport();  
+	return jenkinsService.getJenkinsDetails();  
 		
 		
 
@@ -47,7 +47,7 @@ http://localhost:8080/api/json?tree=jobs[name,url,builds[number,result,duration,
     {
 		
 		
-	return jenkinsService.getJenkinsDetails();  
+	return jenkinsService.jenkinswithTestReport()();  
 		
     }
 	
