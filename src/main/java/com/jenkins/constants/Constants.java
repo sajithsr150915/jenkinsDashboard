@@ -14,6 +14,9 @@ public class Constants {
 	public static final String SUCCESSFUL_BUILDS_API_URL = "/api/json?tree=jobs[name,url,lastSuccessfulBuild[number,result,duration,url,timestamp,actions[buildsByBranchName[*[*[*]]]]]]";
 
 
+	
+
+
 private Constants() {
 	
 }

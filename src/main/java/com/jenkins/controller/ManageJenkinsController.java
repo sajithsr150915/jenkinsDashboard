@@ -35,6 +35,9 @@ public class ManageJenkinsController {
 	}
 	
 	
+	
+	
+	
 	@GetMapping("/jobBuildDetails")
 	public Map<String,JenkinsCountDetail> getCountDetailsofJobs() {
 

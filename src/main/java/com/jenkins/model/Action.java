@@ -1,7 +1,9 @@
 package com.jenkins.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-	public class Action {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class Action {
 		
 		
 	 private int failCount;

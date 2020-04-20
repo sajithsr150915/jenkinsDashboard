@@ -6,17 +6,17 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Build {
+public class BuildDetail {
 		
 	 private String id;
 	 private int number;
 	 private String result;
 	 private long timestamp;
 	 private long duration;
-	 private List<Action> actions=new ArrayList<>();
+	 private List<Action> action=new ArrayList<>();
 
 	 private String url;
-	 protected String jobName;
+	  String jobName;
 	 
 	public String getId() {
 		return id;
@@ -48,11 +48,12 @@ public class Build {
 	public void setDuration(long duration) {
 		this.duration = duration;
 	}
-	public List<Action> getActions() {
-		return actions;
+	
+	public List<Action> getAction() {
+		return action;
 	}
-	public void setActions(List<Action> actions) {
-		this.actions = actions;
+	public void setAction(List<Action> action) {
+		this.action = action;
 	}
 	public String getUrl() {
 		return url;
@@ -63,7 +64,7 @@ public class Build {
 	public String getJobName() {
 
 		String job=this.url.substring(url.indexOf("job/") + 4 , url.length());
-		job=job.substring(0,job.indexOf("'/'"));
+		job=job.substring(0,job.indexOf('/'));
 
 		
 		return job;

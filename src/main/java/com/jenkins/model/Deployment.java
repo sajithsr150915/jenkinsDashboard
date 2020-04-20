@@ -7,6 +7,7 @@ public class Deployment {
 	private String jobName;
 	private long lastSuccessfulRun;
 	private LocalDate successfulRunDate;
+	private Integer buildNo;
 
 	public Deployment() {
 	}
@@ -40,5 +41,14 @@ public class Deployment {
 	public void setSuccessfulRunDate(LocalDate successfulRunDate) {
 		this.successfulRunDate = successfulRunDate;
 	}
+
+	public Integer getBuildNo() {
+		return buildNo;
+	}
+
+	public void setBuildNo(Integer buildNo) {
+		this.buildNo = buildNo;
+	}
+	
 
 }
