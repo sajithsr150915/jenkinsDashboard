@@ -47,7 +47,7 @@ http://localhost:8080/api/json?tree=jobs[name,url,builds[number,result,duration,
     {
 		
 		
-	return jenkinsService.getJenkinsDetailsjenkinswithTestReport();  
+	return jenkinsService.getJenkinsDetails();  
 		
     }
 	
