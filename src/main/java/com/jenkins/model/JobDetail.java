@@ -10,7 +10,7 @@ public class JobDetail {
 
 	List<BuildDetail> allBuild = new ArrayList<>();
 	List<BuildDetail> lastSuccessfulBuild  = new ArrayList<>();
-
+	
 
 	public List<BuildDetail> getAllBuild() {
 		return allBuild;
@@ -27,6 +27,11 @@ public class JobDetail {
 	public void setLastSuccessfulBuild(List<BuildDetail> lastSuccessfulBuild) {
 		this.lastSuccessfulBuild = lastSuccessfulBuild;
 	}
+
+	
+	
+	
+	
 
 	
 	

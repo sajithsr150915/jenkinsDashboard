@@ -16,6 +16,11 @@ public class JenkinsController {
 	
 	
 
+	
+	/**
+	 * @return String 
+	 * The method invokes the jenkins API
+	 */
 	@GetMapping("/jenkinsDetails")
     public String  jenkinsDetails() 
     {
@@ -41,13 +46,16 @@ http://localhost:8080/api/json?tree=jobs[name,url,builds[number,result,duration,
 
 */
     }
-	
+	/**
+	 * @return String 
+	 * The method invokes the jenkins API and produce results with test report
+	 */
 	@GetMapping("/jenkinswithTestReport")
     public String  jenkinswithTestReport() 
     {
 		
 		
-	return jenkinsService.getJenkinsDetails();  
+	return jenkinsService.jenkinswithTestReport();  
 		
     }
 	

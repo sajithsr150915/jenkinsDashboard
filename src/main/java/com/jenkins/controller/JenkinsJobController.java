@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jenkins.model.Deployment;
+import com.jenkins.model.TestJobCountDetail;
 import com.jenkins.service.JenkinsCountDetail;
 import com.jenkins.service.ManageJenkinsService;
-import com.jenkins.service.TestJobCountDetail;
 
 
 @RestController
@@ -23,13 +23,21 @@ public class JenkinsJobController {
 	@Autowired(required=true)
 	ManageJenkinsService manageJenkinsService;
 	
+	/**
+	 * @return JenkinsCountDetail
+	 * Method to get the total build count with in default time frame.
+	 */
 	@GetMapping(value= {"/totalBuildCountJenkins"})
-	public JenkinsCountDetail getTotalBuildCountJenkins() {
- 
+	public JenkinsCountDetail getTotalBuildCountJenkins() { 
 		return manageJenkinsService.getTotalBuildCountJenkins(null); 
 
 	}
 	
+	
+	/**
+	 * @return JenkinsCountDetail
+	 * Method to get the total build count of UAT with in default time frame.
+	 */
 	@GetMapping(value= {"/totalBuildCountUAT"})
 	public JenkinsCountDetail getTotalBuildCountUAT() {
 
@@ -37,7 +45,10 @@ public class JenkinsJobController {
 
 	}
 	
-	
+	/**
+	 * @return JenkinsCountDetail
+	 * Method to get the total build count of PROD with in default time frame.
+	 */
 	@GetMapping(value= {"/totalBuildCountPROD"})
 	public JenkinsCountDetail getTotalBuildCountPROD() {
 
@@ -45,6 +56,11 @@ public class JenkinsJobController {
 
 	}
 	
+	
+	/**
+	 * @return TestJobCountDetail
+	 * Method to get the test case count of Acceptance pipeline
+	 */
 	@GetMapping(value= {"/totalCountAcceptance"})
 	public TestJobCountDetail getTotalCountAcceptance() {
 
@@ -53,7 +69,11 @@ public class JenkinsJobController {
 	}
 	
 	
-	
+
+	/**
+	 * @return Map<String, JenkinsCountDetail>
+	 * Method to get the count of builds grouped by job
+	 */
 	@GetMapping(value= {"/countGroupByJenkinsJob"})
 	public Map<String, JenkinsCountDetail> getCountGroupByJenkinsJob() {
 
@@ -61,6 +81,10 @@ public class JenkinsJobController {
 
 	}
 	
+	/**
+	 * @return Map<String, JenkinsCountDetail>
+	 * Method to get the count of UAT builds grouped by job
+	 */
 	@GetMapping(value= {"/countGroupByUAT"})
 	public Map<String, JenkinsCountDetail> getCountGroupByUATDeploymnt() {
 
@@ -68,6 +92,10 @@ public class JenkinsJobController {
 
 	}
 	
+	/**
+	 * @return Map<String, JenkinsCountDetail>
+	 * Method to get the count of PROD builds grouped by job
+	 */
 	@GetMapping(value= {"/countGroupByPROD"})
 	public Map<String, JenkinsCountDetail> getCountGroupByPRODDeploymnt() {
 
@@ -75,6 +103,10 @@ public class JenkinsJobController {
 
 	}	
 	
+	/**
+	 * @return Map<String, TestJobCountDetail>
+	 * Method to get the test case count grouped by job
+	 */
 	@GetMapping(value= {"/countGroupByAcceptancTest"})
 	public Map<String, TestJobCountDetail> getCountGroupByAcceptancTest() {
 
@@ -82,7 +114,10 @@ public class JenkinsJobController {
 
 	}
 	
-	
+	/**
+	 * @return JenkinsCountDetail
+	 * Method to get the total build count with in day limit
+	 */
 	@GetMapping(value= {"/totalBuildCountJenkins/{dayLimit}"})
 	public JenkinsCountDetail getTotalBuildCountJenkins(@PathVariable(name = "dayLimit") Integer dayLimit) {
 
@@ -90,6 +125,11 @@ public class JenkinsJobController {
 
 	}
 	
+	/**
+	 * @param dayLimit
+	 * @return JenkinsCountDetail
+	 * Method to get the total build count with in day limit
+	 */
 	@GetMapping(value= {"/totalBuildCountUAT/{dayLimit}"})
 	public JenkinsCountDetail getTotalBuildCountUAT(@PathVariable(name = "dayLimit") Integer dayLimit) {
 
@@ -98,6 +138,11 @@ public class JenkinsJobController {
 	}
 	
 	
+	/**
+	 * @param dayLimit
+	 * @return JenkinsCountDetail
+	 * Method to get the total build count of PROD with in day limit
+	 */
 	@GetMapping(value= {"/totalBuildCountPROD/{dayLimit}"})
 	public JenkinsCountDetail getTotalBuildCountPROD(@PathVariable(name = "dayLimit") Integer dayLimit) {
 
@@ -105,6 +150,11 @@ public class JenkinsJobController {
 
 	}
 	
+	/**
+	 * @param dayLimit
+	 * @return TestJobCountDetail
+	 * Method to get the test case count of Acceptance pipeline with in day limit
+	 */
 	@GetMapping(value= {"/totalCountAcceptance/{dayLimit}"})
 	public TestJobCountDetail getTotalCountAcceptance(@PathVariable(name = "dayLimit") Integer dayLimit) {
 
@@ -113,7 +163,11 @@ public class JenkinsJobController {
 	}
 	
 	
-	
+	/**
+	 * @param dayLimit
+	 * @return Map<String, JenkinsCountDetail>
+	 * Method to get the count of builds grouped by job with in day limit
+	 */
 	@GetMapping(value= {"/countGroupByJenkinsJob/{dayLimit}"})
 	public Map<String, JenkinsCountDetail> getCountGroupByJenkinsJob(@PathVariable(name = "dayLimit") Integer dayLimit) {
 
@@ -121,6 +175,11 @@ public class JenkinsJobController {
 
 	}
 	
+	/**
+	 * @param dayLimit
+	 * @return Map<String, JenkinsCountDetail>
+	 * Method to get the count of UAT builds grouped by job with in day limit
+	 */
 	@GetMapping(value= {"/countGroupByUAT/{dayLimit}"})
 	public Map<String, JenkinsCountDetail> getCountGroupByUATDeploymnt(@PathVariable(name = "dayLimit") Integer dayLimit) {
 
@@ -128,6 +187,11 @@ public class JenkinsJobController {
 
 	}
 	
+	/**
+	 * @param dayLimit
+	 * @return Map<String, JenkinsCountDetail>
+	 * Method to get the count of PROD builds grouped by job with in day limit
+	 */
 	@GetMapping(value= {"/countGroupByPROD/{dayLimit}"})
 	public Map<String, JenkinsCountDetail> getCountGroupByPRODDeploymnt(@PathVariable(name = "dayLimit") Integer dayLimit) {
 
@@ -135,6 +199,11 @@ public class JenkinsJobController {
 
 	}	
 	
+	/**
+	 * @param dayLimit
+	 * @return Map<String, TestJobCountDetail>
+	 * Method to get the test case count grouped by job with in day limit
+	 */
 	@GetMapping(value= {"/countGroupByAcceptancTest/{dayLimit}"})
 	public Map<String, TestJobCountDetail> getCountGroupByAcceptancTest(@PathVariable(name = "dayLimit") Integer dayLimit) {
 
@@ -142,13 +211,21 @@ public class JenkinsJobController {
 
 	}
 	
+	
+	/**
+	 * @return List<Deployment>
+	 * Method to get last UAT deployments
+	 */
 	@GetMapping(value= {"/lastUATDeployments"})
 	public List<Deployment> lastUATDeployments() {
 		return manageJenkinsService.lastUATDeployments();    
 
 	}
 		
-
+	/**
+	 * @return List<Deployment>
+	 * Method to get last PROD deployments
+	 */
 	@GetMapping(value= {"/lastPRODDeployments"})
 	public List<Deployment> lastPRODDeployments() {
 		return manageJenkinsService.lastProdDeployments();    

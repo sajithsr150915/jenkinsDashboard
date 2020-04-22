@@ -62,12 +62,21 @@ public class BuildDetail {
 		this.url = url;
 	}
 	public String getJobName() {
-
-		String job=this.url.substring(url.indexOf("job/") + 4 , url.length());
-		job=job.substring(0,job.indexOf('/'));
-
+	
 		
-		return job;
+		String[] urlArray=url.split("/job/");
+		StringBuilder job = new StringBuilder("");
+
+		for(int count=1;count<urlArray.length;count++) {
+	
+			if(urlArray[count].contains("/")) {
+				job=job.append(urlArray[count].substring(0,urlArray[count].indexOf('/')));
+			}else {
+				job=job.append(urlArray[count]).append("/");
+			}
+				
+		}
+		return job.toString();
 	}
 	public void setJobName(String jobName) {
 		this.jobName = jobName;
