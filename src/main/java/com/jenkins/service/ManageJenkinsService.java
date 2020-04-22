@@ -4,16 +4,17 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
 import org.json.XML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -24,26 +25,41 @@ import com.jenkins.constants.Constants;
 import com.jenkins.model.Action;
 import com.jenkins.model.BuildDetail;
 import com.jenkins.model.Deployment;
+import com.jenkins.model.JenkinsCountDetail;
 import com.jenkins.model.JenkinsDetail;
 import com.jenkins.model.JenkinsDetails;
+import com.jenkins.model.JenkinsJobCountDetail;
 import com.jenkins.model.JobDetail;
 import com.jenkins.model.TestJobCountDetail;
+import com.jenkins.model.TestJobDetail;
 
 import io.micrometer.core.instrument.util.StringUtils;
 
 @Service
-@Component
 public class ManageJenkinsService {
-
-	private final RestTemplate restTemplate;
+  
+	@Autowired
+	private RestTemplateBuilder restTemplateBuilder;
+	
+	
+	 
 	@Value("${jenkinsURL}")
 	private String url;
-	@Value("${userName}")
-	private String usrname="admin";
+	@Value("${usrName}")
+	private  String usrname;
 	@Value("${password}")
-	private String pswd="admin";
+	private  String pswd;
+	@Value("${dayLimit}")
+	private Integer dayLimit;
+	
+	 
 	
 	
+	
+	
+
+	private static final Logger LOGGER=LoggerFactory.getLogger(ManageJenkinsService.class);
+	 
 	
 	
 	private String jenkinsDetailsURL = "/api/xml?tree=jobs[name,url,allBuilds[number,result,duration,url,timestamp,actions[buildsByBranchName[*[*[*]]]]]]&xpath=/hudson/job/allBuild[timestamp[.>TIMESTAMP]]&wrapper=job";
@@ -58,9 +74,9 @@ public class ManageJenkinsService {
 
 	private String prodAPIURLBranch = "/api/xml?tree=jobs[jobs[name,url,allBuilds[number,result,duration,url,timestamp,actions[buildsByBranchName[*[*[*]]]]]]]&xpath=/hudson/job[job[name[contains(lower-case(.),'prod-deployment')]]/allBuild[timestamp[.>TIMESTAMP]]]&wrapper=job";
 
-	private String acceptanceTestURL = "/api/xml?tree=jobs[name,url,allBuilds[number,result,duration,url,timestamp,actions[*]]]&xpath=/hudson/job[name[contains(lower-case(.),'acceptance')]]/allBuild[timestamp[.>TIMESTAMP]]&wrapper=job"; 
+	private String acceptanceTestURL = "/api/xml?tree=jobs[name,url,allBuilds[number,result,duration,url,timestamp,actions[*]]]&xpath=/hudson/job[name[contains(lower-case(.),'test-acceptance')]]/allBuild[timestamp[.>TIMESTAMP]]&wrapper=job"; 
 
-	private String acceptanceTestURLBranch = "/api/xml?tree=jobs[jobs[name,url,allBuilds[number,result,duration,url,timestamp,actions[*]]]]&xpath=/hudson/job[job[name[contains(lower-case(.),'acceptance')]]/allBuild[timestamp[.>TIMESTAMP]]]&wrapper=job";
+	private String acceptanceTestURLBranch = "/api/xml?tree=jobs[jobs[name,url,allBuilds[number,result,duration,url,timestamp,actions[*]]]]&xpath=/hudson/job[job[name[contains(lower-case(.),'test-acceptance')]]/allBuild[timestamp[.>TIMESTAMP]]]&wrapper=job";
 
 	private String uatLastSuccessURL = "/api/xml?tree=jobs[name,url,lastSuccessfulBuild[number,result,duration,url,timestamp,actions[buildsByBranchName[*[*[*]]]]]]&xpath=/hudson/job[name[contains(lower-case(.),'uat-deployment')]]/lastSuccessfulBuild[timestamp[.>1]]&wrapper=job";
 
@@ -72,18 +88,16 @@ public class ManageJenkinsService {
 
 	public static final String TIMESTAMP = "TIMESTAMP";
 
-	/**
-	 * @param restTemplateBuilder setting rest template
-	 */
-	public ManageJenkinsService(RestTemplateBuilder restTemplateBuilder) {
-		this.restTemplate = restTemplateBuilder.basicAuthentication(usrname, pswd).build();
-	}
+
+	
+	
 
 	/**
 	 * @param dayLimit
 	 * @return JenkinsCountDetail total build count
+	 * @ 
 	 */
-	public JenkinsCountDetail getTotalBuildCountJenkins(Integer dayLimit) {
+	public JenkinsCountDetail getTotalBuildCountJenkins(Integer dayLimit)  {
 
 		JenkinsCountDetail jenkinsCountDetail = new JenkinsCountDetail();
 		Map<String, JenkinsCountDetail> jenkinsJobMap = getCountGroupByJenkinsJob(null, getTimeStampPast(dayLimit));
@@ -102,7 +116,7 @@ public class ManageJenkinsService {
 	 */
 	private long getTimeStampPast(Integer dayLimit) {
 		if (null == dayLimit) {
-			dayLimit = 30;
+			dayLimit = this.dayLimit;
 		}
 
 		Calendar cal = Calendar.getInstance();
@@ -113,8 +127,9 @@ public class ManageJenkinsService {
 	/**
 	 * @param dayLimit
 	 * @return JenkinsCountDetail get UAT build count
+	 * @ 
 	 */
-	public JenkinsCountDetail getTotalBuildCountUAT(Integer dayLimit) {
+	public JenkinsCountDetail getTotalBuildCountUAT(Integer dayLimit)  {
 		JenkinsCountDetail jenkinsCountDetail = new JenkinsCountDetail();
 		Map<String, JenkinsCountDetail> jenkinsJobMap = getCountGroupByJenkinsJob(Constants.UAT_DEPLOYMENT,
 				getTimeStampPast(dayLimit));
@@ -130,8 +145,9 @@ public class ManageJenkinsService {
 	/**
 	 * @param dayLimit
 	 * @return JenkinsCountDetail get PROD build count
+	 * @ 
 	 */
-	public JenkinsCountDetail getTotalBuildCountPROD(Integer dayLimit) {
+	public JenkinsCountDetail getTotalBuildCountPROD(Integer dayLimit)  {
 		JenkinsCountDetail jenkinsCountDetail = new JenkinsCountDetail();
 		Map<String, JenkinsCountDetail> jenkinsJobMap = getCountGroupByJenkinsJob(Constants.PROD_DEPLOYMENT,
 				getTimeStampPast(dayLimit));
@@ -147,8 +163,9 @@ public class ManageJenkinsService {
 	/**
 	 * @param dayLimit
 	 * @return TestJobCountDetail get Acceptance job test case count
+	 * @ 
 	 */
-	public TestJobCountDetail getTotalCountAcceptance(Integer dayLimit) {
+	public TestJobCountDetail getTotalCountAcceptance(Integer dayLimit)  {
 
 		TestJobCountDetail jenkinsCountDetail = new TestJobCountDetail();
 		Map<String, TestJobCountDetail> jenkinsJobMap = getCountGroupByAcceptance(getTimeStampPast(dayLimit));
@@ -165,47 +182,97 @@ public class ManageJenkinsService {
 	/**
 	 * @param dayLimit
 	 * @return Map<String, JenkinsCountDetail> count grouped by job
+	 * @ 
 	 */
-	public Map<String, JenkinsCountDetail> getCountGroupByUATDeploymnt(Integer dayLimit) {
-		return getCountGroupByJenkinsJob(Constants.UAT_DEPLOYMENT, getTimeStampPast(dayLimit));
+	public List<JenkinsJobCountDetail> getCountGroupByUATDeploymnt(Integer dayLimit)  {
+		
+		List<JenkinsJobCountDetail> list=new ArrayList<>();
+		Map<String, JenkinsCountDetail> jenkinsJobMap = getCountGroupByJenkinsJob(Constants.UAT_DEPLOYMENT, getTimeStampPast(dayLimit));
+		convertMaptoList(list, jenkinsJobMap);
+		return list;
 
+	}
+
+	/**
+	 * @param List<JenkinsJobCountDetail>
+	 * @param Map<String, JenkinsCountDetail>
+	 */
+	private void convertMaptoList(List<JenkinsJobCountDetail> list, Map<String, JenkinsCountDetail> jenkinsJobMap) {
+		jenkinsJobMap.forEach((jobName, jenkinsCount) -> {
+			JenkinsJobCountDetail jenkinsCountDetail = new JenkinsJobCountDetail();
+
+			jenkinsCountDetail.setFailureCount(jenkinsCountDetail.getFailureCount() + jenkinsCount.getFailureCount());
+			jenkinsCountDetail.setSuccessCount(jenkinsCountDetail.getSuccessCount() + jenkinsCount.getSuccessCount());
+			jenkinsCountDetail.setTotalCount(jenkinsCountDetail.getTotalCount() + jenkinsCount.getTotalCount());
+			jenkinsCountDetail.setJobname(jobName);
+			list.add(jenkinsCountDetail);
+
+		});
 	}
 
 	/**
 	 * @param dayLimit
 	 * @return Map<String, JenkinsCountDetail> count grouped by job
+	 * @ 
 	 */
-	public Map<String, JenkinsCountDetail> getCountGroupByPRODDeploymnt(Integer dayLimit) {
-		return getCountGroupByJenkinsJob(Constants.PROD_DEPLOYMENT, getTimeStampPast(dayLimit));
+	public List<JenkinsJobCountDetail> getCountGroupByPRODDeploymnt(Integer dayLimit)  {
+		
+		List<JenkinsJobCountDetail> list=new ArrayList<>();
+		Map<String, JenkinsCountDetail> jenkinsJobMap = getCountGroupByJenkinsJob(Constants.PROD_DEPLOYMENT, getTimeStampPast(dayLimit));
+		convertMaptoList(list, jenkinsJobMap);
+		return list;
+
 
 	}
 
 	/**
 	 * @param dayLimit
 	 * @return Map<String, TestJobCountDetail> count grouped by job
+	 * @ 
 	 */
-	public Map<String, TestJobCountDetail> getCountGroupByAcceptancTest(Integer dayLimit) {
-		return getCountGroupByAcceptance(getTimeStampPast(dayLimit));
+	public List<TestJobDetail> getCountGroupByAcceptancTest(Integer dayLimit)  {
+		
+		
+		List<TestJobDetail> list=new ArrayList<>();
+		Map<String, TestJobCountDetail> jenkinsJobMap = getCountGroupByAcceptance(getTimeStampPast(dayLimit));
+		jenkinsJobMap.forEach((jobName, jenkinsCount) -> {
+			TestJobDetail jenkinsCountDetail = new TestJobDetail();
+			jenkinsCountDetail.setFailureCount(jenkinsCountDetail.getFailureCount() + jenkinsCount.getFailureCount());
+			jenkinsCountDetail.setSuccessCount(jenkinsCountDetail.getSuccessCount() + jenkinsCount.getSuccessCount());
+			jenkinsCountDetail.setTotalCount(jenkinsCountDetail.getTotalCount() + jenkinsCount.getTotalCount());
+			jenkinsCountDetail.setSkippedCount(jenkinsCountDetail.getSkippedCount() + jenkinsCount.getSkippedCount());
+			jenkinsCountDetail.setName(jobName);
+			list.add(jenkinsCountDetail);
+		});
+		return list;
+		
 
 	}
 
 	/**
 	 * @param deployment
 	 * @param dayLimit
-	 * @return Map<String, JenkinsCountDetail>
+	 * @return List<JenkinsJobCountDetail>
+	 * @ 
 	 */
-	public Map<String, JenkinsCountDetail> getCountGroupByJenkinsJob(String deployment, Integer dayLimit) {
+	public List<JenkinsJobCountDetail> getCountGroupByJenkinsJob(Integer dayLimit)  {
 
-		return getCountGroupByJenkinsJob(deployment, getTimeStampPast(dayLimit));
+		
+		List<JenkinsJobCountDetail> list=new ArrayList<>();
+		Map<String, JenkinsCountDetail> jenkinsJobMap = getCountGroupByJenkinsJob(null, getTimeStampPast(dayLimit)); 
+		convertMaptoList(list, jenkinsJobMap);
+		return list;
 	}
 
 	/**
 	 * @param deployment
 	 * @param dayLimit
 	 * @return Map<String, JenkinsCountDetail> get count based on type UAT/PROD/All
+	 * @ 
+	 * @ 
 	 */
-	public Map<String, JenkinsCountDetail> getCountGroupByJenkinsJob(String deployment, long dayLimit) {
-		try {
+	public Map<String, JenkinsCountDetail> getCountGroupByJenkinsJob(String deployment, long dayLimit)   {
+		
 			String timestamp = String.valueOf(dayLimit);
 			String urlString = "";
 			String urlStringBranch = "";
@@ -252,10 +319,7 @@ public class ManageJenkinsService {
 
 			return jenkinsJobMap;
 
-		} catch (Exception e) {
-
-			return null;
-		}
+		
 
 	}
 
@@ -294,25 +358,15 @@ public class ManageJenkinsService {
 
 			List<BuildDetail> buildListOld = new ArrayList<>();
 			buildListOld = job.getJob().getAllBuild();
-			for (JobDetail jobVal : jobBranchDeploy.getJob().getJob().getJob()) {
-				if (null != jobVal && null != jobVal.getAllBuild()) {
-
-					buildList.addAll(jobVal.getAllBuild());
-				}
-			}
+			setAllBuildList(jobBranchDeploy, buildList);
 			buildListOld.addAll(buildList);
 			job.getJob().setAllBuild(buildListOld);
 
 		}
-		if( (null!=job) &&  null==job.getJob() && null!=jobBranchDeploy && null !=jobBranchDeploy.getJob().getJob().getJob()) {
+		if( (null!=job) &&  null==job.getJob() && null!=jobBranchDeploy && null !=jobBranchDeploy.getJob() && null !=jobBranchDeploy.getJob().getJob().getJob()) {
 			
 			JobDetail detail=new JobDetail();
-			for (JobDetail jobVal : jobBranchDeploy.getJob().getJob().getJob()) {
-				if (null != jobVal && null != jobVal.getAllBuild()) {
-
-					buildList.addAll(jobVal.getAllBuild());
-				}
-			}
+			setAllBuildList(jobBranchDeploy, buildList);
 			detail.setAllBuild(buildList);
 			job.setJob(detail);
 			
@@ -320,15 +374,27 @@ public class ManageJenkinsService {
 		}
 	}
 
+	private void setAllBuildList(JenkinsDetails jobBranchDeploy, List<BuildDetail> buildList) {
+		for (JobDetail jobVal : jobBranchDeploy.getJob().getJob().getJob()) {
+			if (null != jobVal && null != jobVal.getAllBuild()) {
+
+				buildList.addAll(jobVal.getAllBuild());
+			}
+		}
+	}
+
 	/**
 	 * @param timestamp
 	 * @param urlString
 	 * @return JenkinsDetail
-	 * @throws JsonProcessingException
+	 * @
 	 * get details invoking jenkins API
 	 */
-	private JenkinsDetail getJenkinsJobDetails(String timestamp, String urlString) throws JsonProcessingException {
+	private JenkinsDetail getJenkinsJobDetails(String timestamp, String urlString) {
 		urlString = urlString.replace(TIMESTAMP, timestamp);
+
+		
+        LOGGER.info("get jenkins Job details");
 
 		String json = getJenkinsResponseXml(urlString);
 		// Object mapper instance
@@ -337,18 +403,25 @@ public class ManageJenkinsService {
 		mapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
 
 		// Convert JSON to POJO
-		return mapper.readValue(json, JenkinsDetail.class);
+		try {
+			return mapper.readValue(json, JenkinsDetail.class);
+		} catch (JsonProcessingException e) {
+			LOGGER.error("error whil parsing JSON ",e);
+		}
+		return null;
 	}
 
 	/**
 	 * @param timestamp
 	 * @param urlString
 	 * @return JenkinsDetails
-	 * @throws JsonProcessingException
+	 * @
 	 * get details of jobs with in jobs invoking jenkins API 
 	 */
 	private JenkinsDetails getJenkinsJobDetailsBranch(String timestamp, String urlString)
-			throws JsonProcessingException {
+			 {
+        LOGGER.info("get jenkins Job details with in job");
+
 		urlString = urlString.replace(TIMESTAMP, timestamp);
 
 		String json = getJenkinsResponseXml(urlString);
@@ -359,15 +432,24 @@ public class ManageJenkinsService {
 		mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 
 		// Convert JSON to POJO
-		return mapper.readValue(json, JenkinsDetails.class);
+		try {
+			return mapper.readValue(json, JenkinsDetails.class);
+		} catch (JsonProcessingException e) {
+
+			LOGGER.error("error whil parsing JSON ",e);
+		}
+		return null;
+		
 	}
 
 	/**
 	 * @param timeStamp
 	 * @return Map<String, TestJobCountDetail> count grouped by acceptance job
+	 * @ 
+	 * @ 
 	 */
-	public Map<String, TestJobCountDetail> getCountGroupByAcceptance(long timeStamp) {
-		try {
+	public Map<String, TestJobCountDetail> getCountGroupByAcceptance(long timeStamp)    {
+		
 			String timestamp = String.valueOf(timeStamp);
 
 			JenkinsDetail job = getJenkinsJobDetails(timestamp, acceptanceTestURL);
@@ -386,18 +468,14 @@ public class ManageJenkinsService {
 			});
 			return jenkinsJobMap;
 
-		} catch (Exception e) {
-
-			return null;
-		}
-
+		
 	}
 
-	public List<Deployment> lastUATDeployments() {
+	public List<Deployment> lastUATDeployments()  {
 		return lastDeployments(uatLastSuccessURL, uatLastSuccessURLBranch);
 	}
 
-	public List<Deployment> lastProdDeployments() {
+	public List<Deployment> lastProdDeployments()  {
 		return lastDeployments(prodLastSuccessURL, prodLastSuccessURLBranch);
 
 	}
@@ -405,10 +483,11 @@ public class ManageJenkinsService {
 	/**
 	 * @param url
 	 * @return List<Deployment> last deployment data
+	 * @ 
+	 * @ 
 	 */
-	public List<Deployment> lastDeployments(String url, String urlBranch) {
+	public List<Deployment> lastDeployments(String url, String urlBranch)   {
 		List<Deployment> deployList = new ArrayList<>();
-		try {
 
 			JenkinsDetail job = getJenkinsJobDetails("", url);
 
@@ -422,45 +501,42 @@ public class ManageJenkinsService {
 				setDeploymentValues(lastBuilds, deployList);
 			}
 			return deployList;
-		} catch (Exception e) {
-			return deployList;
-		}
+		
 
 	}
 
 	public void setAdditionalCase(JenkinsDetail job, JenkinsDetails jobBranchDeploy) {
-		
-		List<BuildDetail> buildList = new ArrayList<>();
 
+		List<BuildDetail> buildList = new ArrayList<>();
 		if (null != job && null != job.getJob() && null != job.getJob().getLastSuccessfulBuild()
 				&& null != jobBranchDeploy && null != jobBranchDeploy.getJob()
 				&& null != jobBranchDeploy.getJob().getJob() && null != jobBranchDeploy.getJob().getJob().getJob()) {
 
 			List<BuildDetail> buildListOld = new ArrayList<>();
 			buildListOld = job.getJob().getLastSuccessfulBuild();
-			for (JobDetail jobVal : jobBranchDeploy.getJob().getJob().getJob()) {
-				if (null != jobVal && null != jobVal.getLastSuccessfulBuild()) {
-
-					buildList.addAll(jobVal.getLastSuccessfulBuild());
-				}
-			}
+			setBuildList(jobBranchDeploy, buildList);
 			buildListOld.addAll(buildList);
 			job.getJob().setLastSuccessfulBuild(buildListOld);
 
 		}
-	if( (null!=job) &&  null==job.getJob() && null!=jobBranchDeploy && null !=jobBranchDeploy.getJob().getJob().getJob()) {
-			
-			JobDetail detail=new JobDetail();
-			for (JobDetail jobVal : jobBranchDeploy.getJob().getJob().getJob()) {
-				if (null != jobVal && null != jobVal.getLastSuccessfulBuild()) {
+		if ((null != job) && null == job.getJob() && null != jobBranchDeploy
+				&& null != jobBranchDeploy.getJob().getJob().getJob()) {
 
-					buildList.addAll(jobVal.getLastSuccessfulBuild());
-				}
-			}
+			JobDetail detail = new JobDetail();
+			setBuildList(jobBranchDeploy, buildList);
 			detail.setLastSuccessfulBuild(buildList);
 			job.setJob(detail);
-				
+
+		}
 	}
+
+	private void setBuildList(JenkinsDetails jobBranchDeploy, List<BuildDetail> buildList) {
+		for (JobDetail jobVal : jobBranchDeploy.getJob().getJob().getJob()) {
+			if (null != jobVal && null != jobVal.getLastSuccessfulBuild()) {
+
+				buildList.addAll(jobVal.getLastSuccessfulBuild());
+			}
+		}
 	}
 
 	/**
@@ -485,21 +561,28 @@ public class ManageJenkinsService {
 	 */
 	private String getJenkinsResponseXml(String url) {
 
+         LOGGER.info("invoking Jenkins API");
+		RestTemplate restTemplate = this.restTemplateBuilder.basicAuthentication(usrname,pswd).build();	
+		
 		String jenkinsUrl = this.url + url;
-		String xml = this.restTemplate.getForObject(jenkinsUrl, String.class);
+		String xml = restTemplate.getForObject(jenkinsUrl, String.class);
 
 		JSONObject jsonObj = XML.toJSONObject(xml);
 		return jsonObj.toString();
 	}
+	
+	
+	
 
 	/**
 	 * @param job
 	 * @return Map<String,List<BuildDetail>> creat a build Map grouped by job
 	 */
 	private Map<String, List<BuildDetail>> buildMap(JenkinsDetail job) {
-		if(null!=job) {
-		List<BuildDetail> buildDetailsList = job.getJob().getAllBuild();
 		Map<String, List<BuildDetail>> buildMap = new LinkedHashMap<>();
+
+		if(null!=job && null!=job.getJob()) {
+		List<BuildDetail> buildDetailsList = job.getJob().getAllBuild();
 		for (BuildDetail build : buildDetailsList) {
 			if (null != buildMap.get(build.getJobName())) {
 				List<BuildDetail> buildList = buildMap.get(build.getJobName());
@@ -513,7 +596,7 @@ public class ManageJenkinsService {
 		}
 		return buildMap;
 		}
-		return new HashMap<String, List<BuildDetail>>();
+		return buildMap;
 
 	}
 
@@ -579,3 +662,4 @@ public class ManageJenkinsService {
 	}
 
 }
+ 
